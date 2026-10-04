@@ -9,7 +9,8 @@ import { copyFor } from "@/lib/copy";
 import { previewFontCss } from "@/lib/fonts";
 import { renderCv } from "@/lib/cv-html";
 import { emptyCv, normalizeCv, sampleCv, toView } from "@/lib/model";
-import type { CvData, ExportFormat } from "@/lib/types";
+import { switchLanguage } from "@/lib/switch-language";
+import type { CvData, ExportFormat, Lang } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "korot-draft-v1";
@@ -49,6 +50,7 @@ export function CvStudio() {
   const [exporting, setExporting] = useState<ExportFormat | null>(null);
   const [error, setError] = useState("");
   const [confirmClear, setConfirmClear] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const preview = useMemo(
     () => renderCv(toView(cv), { mode: "preview", fontCss: previewFontCss }),
     [cv],
@@ -68,6 +70,20 @@ export function CvStudio() {
   const primaryLabel = cv.format === "pdf" ? copy.downloadPdf : copy.downloadWord;
   const secondaryFormat: ExportFormat = cv.format === "pdf" ? "docx" : "pdf";
   const secondaryLabel = cv.format === "pdf" ? copy.alsoWord : copy.alsoPdf;
+
+  async function changeLanguage(lang: Lang) {
+    if (lang === cv.lang || translating) return;
+    setTranslating(true);
+    setError("");
+    try {
+      const next = await switchLanguage(cv, lang);
+      setCv(next);
+    } catch {
+      setError(copy.translateFailed);
+    } finally {
+      setTranslating(false);
+    }
+  }
 
   async function download(format: ExportFormat) {
     if (!cv.personal.fullName.trim()) {
@@ -202,6 +218,10 @@ export function CvStudio() {
           <CvForm
             cv={cv}
             copy={copy}
+            translating={translating}
+            onLanguage={(lang) => {
+              void changeLanguage(lang);
+            }}
             update={(recipe) => {
               setError("");
               setCv((current) => recipe(current));

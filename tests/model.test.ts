@@ -15,6 +15,11 @@ test("orders jobs from the latest and hides high school once a degree exists", (
   assert.equal(view.education?.items[0]?.lines.some((line) => line.text === "בהצטיינות"), true);
   assert.deepEqual(view.skills?.items, ["Office", "Excel", "Salesforce", "Python"]);
   assert.equal(view.languages?.items[0]?.level, "שפת אם");
+  assert.equal(view.military?.title, "שירות צבאי ולאומי");
+  assert.equal(view.military?.items[0]?.heading, "משקית שלישות");
+  assert.match(view.military?.items[0]?.meta ?? "", /שירות צבאי/);
+  assert.equal(view.military?.items[1]?.heading, "מדריכה");
+  assert.match(view.military?.items[1]?.meta ?? "", /שירות לאומי/);
 });
 
 test("escapes text and marks selected tools with V", () => {

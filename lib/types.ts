@@ -2,6 +2,7 @@ export type Lang = "he" | "en";
 export type FontChoice = "david" | "arial";
 export type ExportFormat = "pdf" | "docx";
 export type EducationKind = "academic" | "certificate" | "highschool";
+export type ServiceKind = "military" | "national";
 export type LanguageLevel =
   | "native"
   | "fluent"
@@ -48,11 +49,33 @@ export type Education = {
 
 export type Military = {
   id: string;
+  kind: ServiceKind;
   role: string;
   base: string;
   fromYear: string;
   toYear: string;
   current: boolean;
+};
+
+export type CvSnapshot = {
+  personal: Personal;
+  summary: string;
+  jobs: Job[];
+  education: Education[];
+  military: Military[];
+  skills: Skill[];
+  languages: LanguageSkill[];
+};
+
+export type StoredEdition = {
+  snap: CvSnapshot;
+  /** "user" when this text was written in the form. Otherwise the hash of the source it was translated from. */
+  basedOn: string;
+};
+
+export type CvMemory = {
+  he: StoredEdition | null;
+  en: StoredEdition | null;
 };
 
 export type Skill = {
@@ -79,6 +102,7 @@ export type CvData = {
   military: Military[];
   skills: Skill[];
   languages: LanguageSkill[];
+  memory: CvMemory;
 };
 
 export type CvLine = {

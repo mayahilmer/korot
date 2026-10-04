@@ -21,3 +21,17 @@ test("turns extra bullets into four lines without new facts", () => {
 test("returns an empty string for blank notes", () => {
   assert.equal(arrangeSummary("  \n  "), "");
 });
+
+test("drops filler and a repeated sentence but keeps the number", () => {
+  const input = [
+    "אני בעצם מנהלת תפעול עם ניסיון מאוד רחב.",
+    "אני בעצם מנהלת תפעול עם ניסיון מאוד רחב.",
+    "צמצמתי זמני אספקה ב־30%.",
+  ].join(" ");
+  const output = arrangeSummary(input);
+  assert.equal(summaryLineCount(output), 2);
+  assert.match(output, /30%/);
+  assert.doesNotMatch(output, /בעצם|מאוד/);
+  assert.equal(output.split("מנהלת תפעול").length - 1, 1);
+  assert.doesNotMatch(output, /manager|team lead/i);
+});

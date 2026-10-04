@@ -6,6 +6,8 @@ import type {
   CvData,
   CvItem,
   CvLine,
+  CvMemory,
+  CvSnapshot,
   CvView,
   Education,
   EducationKind,
@@ -17,7 +19,9 @@ import type {
   LanguageSkill,
   Military,
   Personal,
+  ServiceKind,
   Skill,
+  StoredEdition,
 } from "@/lib/types";
 
 export const SKILL_PRESETS = [
@@ -95,9 +99,10 @@ export function blankEducation(kind: EducationKind = "academic"): Education {
   };
 }
 
-export function blankMilitary(): Military {
+export function blankMilitary(kind: ServiceKind = "military"): Military {
   return {
     id: createId(),
+    kind,
     role: "",
     base: "",
     fromYear: "",
@@ -130,6 +135,7 @@ export function emptyCv(): CvData {
     military: [],
     skills: presetSkills(),
     languages: [],
+    memory: { he: null, en: null },
   };
 }
 
@@ -192,6 +198,7 @@ function normalizeMilitary(value: unknown): Military | null {
   if (!record) return null;
   return {
     id: text(record.id) || createId(),
+    kind: oneOf<ServiceKind>(record.kind, ["military", "national"], "military"),
     role: text(record.role),
     base: text(record.base),
     fromYear: text(record.fromYear),
@@ -280,6 +287,55 @@ export function normalizeCv(value: unknown): CvData {
           .map(normalizeLanguage)
           .filter((item): item is LanguageSkill => item !== null)
       : base.languages,
+    memory: normalizeMemory(record.memory),
+  };
+}
+
+function normalizeSnapshot(value: unknown): CvSnapshot | null {
+  const record = asRecord(value);
+  if (!record) return null;
+  const personal = asRecord(record.personal) ?? {};
+  return {
+    personal: {
+      fullName: text(personal.fullName),
+      idNumber: text(personal.idNumber),
+      phone: text(personal.phone),
+      email: text(personal.email),
+      city: text(personal.city),
+      linkedin: text(personal.linkedin),
+      portfolio: text(personal.portfolio),
+    },
+    summary: text(record.summary),
+    jobs: Array.isArray(record.jobs)
+      ? record.jobs.map(normalizeJob).filter((item): item is Job => item !== null)
+      : [],
+    education: Array.isArray(record.education)
+      ? record.education.map(normalizeEducation).filter((item): item is Education => item !== null)
+      : [],
+    military: Array.isArray(record.military)
+      ? record.military.map(normalizeMilitary).filter((item): item is Military => item !== null)
+      : [],
+    skills: normalizeSkills(record.skills),
+    languages: Array.isArray(record.languages)
+      ? record.languages.map(normalizeLanguage).filter((item): item is LanguageSkill => item !== null)
+      : [],
+  };
+}
+
+function normalizeEdition(value: unknown): StoredEdition | null {
+  const record = asRecord(value);
+  if (!record) return null;
+  const snap = normalizeSnapshot(record.snap);
+  if (!snap) return null;
+  return { snap, basedOn: text(record.basedOn) || "user" };
+}
+
+function normalizeMemory(value: unknown): CvMemory {
+  const record = asRecord(value);
+  if (!record) return { he: null, en: null };
+  return {
+    he: normalizeEdition(record.he),
+    en: normalizeEdition(record.en),
   };
 }
 
@@ -427,15 +483,28 @@ export function toView(cv: CvData): CvView {
     (item) => chronologyKey("", item.fromYear, "", item.toYear, item.current),
   ).map((item) => toEducationItem(item, labels.present, labels));
 
-  const military = sortByChronology(
+  const militaryItems = sortByChronology(
     cv.military.filter((item) => filled(item.role, item.base, item.fromYear, item.toYear)),
     (item) => chronologyKey("", item.fromYear, "", item.toYear, item.current),
-  ).map((item) => ({
-    heading: item.role.trim(),
-    dates: formatYears(item.fromYear, item.toYear, item.current, labels.present),
-    meta: item.base.trim(),
-    lines: [],
-  }));
+  );
+  const serviceKinds = new Set(militaryItems.map((item) => item.kind));
+  const mixedService = serviceKinds.has("military") && serviceKinds.has("national");
+  const military = militaryItems.map((item) => {
+    const place = item.base.trim();
+    const kindLabel = item.kind === "national" ? labels.national : labels.military;
+    return {
+      heading: item.role.trim(),
+      dates: formatYears(item.fromYear, item.toYear, item.current, labels.present),
+      meta: mixedService ? [kindLabel, place].filter(Boolean).join(" · ") : place,
+      lines: [],
+    };
+  });
+  const militaryTitle =
+    serviceKinds.has("military") && serviceKinds.has("national")
+      ? labels.militaryAndNational
+      : serviceKinds.has("national")
+        ? labels.national
+        : labels.military;
 
   const skills = cv.skills.filter((skill) => skill.selected && skill.name.trim()).map((skill) => skill.name.trim());
   const languages = cv.languages
@@ -445,7 +514,7 @@ export function toView(cv: CvData): CvView {
   const summary = summaryText ? { title: labels.summary, text: summaryText } : null;
   const jobsBlock = jobs.length ? { title: labels.jobs, items: jobs } : null;
   const educationBlock = education.length ? { title: labels.education, items: education } : null;
-  const militaryBlock = military.length ? { title: labels.military, items: military } : null;
+  const militaryBlock = military.length ? { title: militaryTitle, items: military } : null;
   const skillsBlock = skills.length ? { title: labels.skills, items: skills } : null;
   const languagesBlock = languages.length ? { title: labels.languages, items: languages } : null;
   const name = personal.fullName.trim();
@@ -561,10 +630,20 @@ function hebrewSample(keep?: Pick<CvData, "format" | "font">): CvData {
   cv.military = [
     {
       id: "mil-1",
+      kind: "military",
       role: "משקית שלישות",
       base: "בסיס תל השומר",
       fromYear: "2012",
       toYear: "2015",
+      current: false,
+    },
+    {
+      id: "nat-1",
+      kind: "national",
+      role: "מדריכה",
+      base: "בית חולים שיבא",
+      fromYear: "2011",
+      toYear: "2012",
       current: false,
     },
   ];
@@ -643,10 +722,20 @@ function englishSample(keep?: Pick<CvData, "format" | "font">): CvData {
   cv.military = [
     {
       id: "mil-1",
+      kind: "military",
       role: "Personnel NCO",
       base: "Tel Hashomer",
       fromYear: "2012",
       toYear: "2015",
+      current: false,
+    },
+    {
+      id: "nat-1",
+      kind: "national",
+      role: "Guide",
+      base: "Sheba Medical Center",
+      fromYear: "2011",
+      toYear: "2012",
       current: false,
     },
   ];

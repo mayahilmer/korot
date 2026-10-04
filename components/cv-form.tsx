@@ -21,6 +21,7 @@ import { emailLooksOff } from "@/lib/text";
 import type {
   CvData,
   EducationKind,
+  Lang,
   LanguageLevel,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -37,10 +38,14 @@ export function CvForm({
   cv,
   copy,
   update,
+  translating,
+  onLanguage,
 }: {
   cv: CvData;
   copy: Copy;
   update: Update;
+  translating: boolean;
+  onLanguage: (lang: Lang) => void;
 }) {
   return (
     <div className="grid gap-4">
@@ -58,11 +63,14 @@ export function CvForm({
           <Segmented
             label={copy.language}
             value={cv.lang}
+            disabled={translating}
             options={[
               { value: "he", label: "עברית" },
               { value: "en", label: "English" },
             ]}
-            onChange={(lang) => update((current) => ({ ...current, lang }))}
+            onChange={(lang) => {
+              if (lang !== cv.lang) onLanguage(lang);
+            }}
           />
           <Segmented
             label={copy.font}
@@ -75,6 +83,9 @@ export function CvForm({
           />
         </div>
         <p className="text-sm leading-6 text-muted-foreground">{copy.fontHint}</p>
+        <p className="text-sm leading-6 text-muted-foreground">
+          {translating ? copy.translating : copy.languageHint}
+        </p>
       </Section>
 
       <Section index={2} title={copy.personal} hint={copy.personalHint}>
@@ -400,13 +411,24 @@ export function CvForm({
             }
           >
             <div className="grid gap-3 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <Segmented
+                  label={copy.serviceKind}
+                  value={item.kind}
+                  options={[
+                    { value: "military", label: copy.serviceMilitary },
+                    { value: "national", label: copy.serviceNational },
+                  ]}
+                  onChange={(kind) => patchMilitary(update, item.id, { kind })}
+                />
+              </div>
               <Field label={copy.militaryRole}>
                 <Input
                   value={item.role}
                   onChange={(event) => patchMilitary(update, item.id, { role: event.target.value })}
                 />
               </Field>
-              <Field label={copy.base}>
+              <Field label={item.kind === "national" ? copy.placement : copy.base}>
                 <Input
                   value={item.base}
                   onChange={(event) => patchMilitary(update, item.id, { base: event.target.value })}
@@ -803,11 +825,13 @@ function Segmented<T extends string>({
   value,
   options,
   onChange,
+  disabled = false,
 }: {
   label: string;
   value: T;
   options: { value: T; label: string }[];
   onChange: (value: T) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className="grid gap-1.5">
@@ -821,6 +845,7 @@ function Segmented<T extends string>({
               type="button"
               role="radio"
               aria-checked={selected}
+              disabled={disabled}
               onClick={() => onChange(option.value)}
               className={cn(
                 "h-8 flex-1 rounded-md px-2 text-sm transition-colors",

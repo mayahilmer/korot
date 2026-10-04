@@ -1,4 +1,68 @@
 const BULLET = /^[-–—•*·▪►]+\s*/;
+const HEBREW_FILLERS = new Set([
+  "מאוד",
+  "בעצם",
+  "באמת",
+  "כמובן",
+  "פשוט",
+  "בעיקרון",
+  "הרי",
+  "כאילו",
+  "נורא",
+  "וכו",
+  "וכו׳",
+]);
+const ENGLISH_FILLERS = new Set([
+  "very",
+  "really",
+  "basically",
+  "actually",
+  "just",
+  "simply",
+  "quite",
+  "extremely",
+]);
+
+function bareToken(token: string): string {
+  return token.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+}
+
+function tightenLine(line: string): string {
+  const spaced = line.replace(/\bin order to\b/gi, "to");
+  const kept: string[] = [];
+  for (const token of spaced.split(/\s+/).filter(Boolean)) {
+    const bare = bareToken(token);
+    const key = bare.toLowerCase();
+    if (!bare || HEBREW_FILLERS.has(bare) || ENGLISH_FILLERS.has(key)) continue;
+    if (kept.length === 0 && (bare === "אני" || key === "i")) continue;
+    const previous = kept.length ? bareToken(kept[kept.length - 1]).toLowerCase() : "";
+    if (previous && previous === key) continue;
+    kept.push(token);
+  }
+  return clean(kept.join(" "));
+}
+
+function wordsOf(line: string): string[] {
+  return (line.match(/[\p{L}\p{N}]+/gu) ?? []).map((word) => word.toLowerCase());
+}
+
+function dropRedundant(parts: string[]): string[] {
+  const kept: string[] = [];
+  const bags: Set<string>[] = [];
+  for (const part of parts) {
+    const words = wordsOf(part);
+    const bag = new Set(words);
+    const redundant = bags.some((earlier) => {
+      const content = words.filter((word) => word.length > 1);
+      if (content.length === 0 || !content.every((word) => earlier.has(word))) return false;
+      return !words.some((word) => /\d/.test(word) && !earlier.has(word));
+    });
+    if (redundant) continue;
+    kept.push(part);
+    bags.push(bag);
+  }
+  return kept;
+}
 
 function clean(value: string): string {
   return value.replace(/\u00a0/g, " ").replace(/[ \t]+/g, " ").trim();
@@ -74,10 +138,10 @@ export function summaryLineCount(value: string): number {
 
 /**
  * Turns free notes into at most four short lines.
- * The wording stays the writer's; nothing is added.
+ * Repeated words and filler are removed. Nothing new is added.
  */
 export function arrangeSummary(raw: string): string {
-  const parts = extractParts(raw);
+  const parts = dropRedundant(extractParts(raw).map(tightenLine).filter(Boolean));
   if (parts.length === 0) return "";
 
   const lines =

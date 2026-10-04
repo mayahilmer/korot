@@ -22,6 +22,9 @@ export type Copy = {
   documentHint: string;
   fileType: string;
   language: string;
+  languageHint: string;
+  translating: string;
+  translateFailed: string;
   font: string;
   fontHint: string;
   personal: string;
@@ -88,7 +91,11 @@ export type Copy = {
   addMilitary: string;
   militaryFallback: string;
   militaryRole: string;
+  serviceKind: string;
+  serviceMilitary: string;
+  serviceNational: string;
   base: string;
+  placement: string;
   currentService: string;
   skills: string;
   skillsHint: string;
@@ -126,6 +133,9 @@ const he: Copy = {
   documentHint: "קודם בוחרים קובץ, שפה ופונט. אחר כך ממלאים.",
   fileType: "סוג קובץ",
   language: "שפה",
+  languageHint: "במעבר לאנגלית, מה שכתבתם בעברית מתורגם לאנגלית מסודרת. החזרה לעברית מחזירה את הנוסח המקורי.",
+  translating: "מתרגמים את המסמך…",
+  translateFailed: "התרגום לא הושלם. נסו שוב.",
   font: "פונט",
   fontHint: "David לעברית קלאסית. Arial למסמך נקי ומודרני.",
   personal: "פרטים אישיים",
@@ -140,9 +150,9 @@ const he: Copy = {
   linkedin: "לינקדאין",
   portfolio: "תיק עבודות",
   summary: "תמצית מקצועית",
-  summaryHint: "לא חובה. כותבים נקודות חופשיות, והסידור הופך אותן ל־3–4 שורות בלי להוסיף עובדות.",
+  summaryHint: "לא חובה. הכפתור מקצר מילים חוזרות ומסדר ל־3–4 שורות, בלי להוסיף עובדות.",
   summaryPlaceholder: "תפקיד, שנות ניסיון, תחום, והישג אחד שאפשר למדוד.",
-  arrange: "סידור ל־3–4 שורות",
+  arrange: "קיצור ל־3–4 שורות",
   undo: "שחזור הטקסט הקודם",
   arranged: (count) => `סודר ל־${count} שורות.`,
   alreadyArranged: "הטקסט כבר מסודר.",
@@ -191,13 +201,17 @@ const he: Copy = {
   expanded: "מקצועות מורחבים",
   expandedPlaceholder: "מתמטיקה, אנגלית",
   hiddenSchool: "לא ייכנס למסמך, כי כבר יש תואר אקדמי.",
-  military: "שירות צבאי",
-  militaryHint: "לא חובה. אם אין מה לכתוב, הסעיף לא יופיע.",
+  military: "שירות צבאי או לאומי",
+  militaryHint: "בוחרים צבאי או לאומי לכל שירות. אם אין מה לכתוב, הסעיף לא יופיע.",
   militaryEmpty: "אפשר להשאיר את זה ריק.",
   addMilitary: "הוספת שירות",
   militaryFallback: "שירות",
   militaryRole: "תפקיד",
+  serviceKind: "סוג השירות",
+  serviceMilitary: "צבאי",
+  serviceNational: "לאומי",
   base: "בסיס",
+  placement: "מקום השירות",
   currentService: "עדיין בשירות",
   skills: "כישורים ומיומנויות",
   skillsHint: "מסמנים V ליד תוכנות ששולטים בהן. אפשר להוסיף עוד.",
@@ -241,6 +255,9 @@ const en: Copy = {
   documentHint: "Choose the file, the language, and the font. Then fill in the rest.",
   fileType: "File type",
   language: "Language",
+  languageHint: "Choosing English translates a Hebrew form into polished English. Choosing Hebrew brings back the original wording.",
+  translating: "Translating the document…",
+  translateFailed: "The translation did not finish. Try again.",
   font: "Font",
   fontHint: "David is a classic Hebrew text face. Arial is a clean modern one.",
   personal: "Personal details",
@@ -255,9 +272,9 @@ const en: Copy = {
   linkedin: "LinkedIn",
   portfolio: "Portfolio",
   summary: "Professional summary",
-  summaryHint: "Optional. Write rough notes. Arranging them makes 3–4 lines and does not add facts.",
+  summaryHint: "Optional. The button removes repeated words and fits the notes into 3–4 lines. It does not add facts.",
   summaryPlaceholder: "Role, years, field, and one result you can measure.",
-  arrange: "Arrange into 3–4 lines",
+  arrange: "Shorten to 3–4 lines",
   undo: "Restore the previous text",
   arranged: (count) => `Arranged into ${count} lines.`,
   alreadyArranged: "The text is already arranged.",
@@ -306,13 +323,17 @@ const en: Copy = {
   expanded: "Extended subjects",
   expandedPlaceholder: "Mathematics, English",
   hiddenSchool: "This stays off the document because an academic degree is already listed.",
-  military: "Military service",
-  militaryHint: "Optional. If you leave it empty, the section is left out.",
+  military: "Military or national service",
+  militaryHint: "Mark each entry as military or national service. An empty section stays off the document.",
   militaryEmpty: "You can leave this empty.",
   addMilitary: "Add service",
   militaryFallback: "Service",
   militaryRole: "Role",
+  serviceKind: "Type of service",
+  serviceMilitary: "Military",
+  serviceNational: "National",
   base: "Base",
+  placement: "Place of service",
   currentService: "Still serving",
   skills: "Skills",
   skillsHint: "Mark the tools you can use. You can add more.",

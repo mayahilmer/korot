@@ -12,6 +12,8 @@ export type DocLabels = {
   jobs: string;
   education: string;
   military: string;
+  national: string;
+  militaryAndNational: string;
   skills: string;
   languages: string;
   responsibilities: string;
@@ -38,6 +40,8 @@ const he: DocLabels = {
   jobs: "ניסיון תעסוקתי",
   education: "השכלה",
   military: "שירות צבאי",
+  national: "שירות לאומי",
+  militaryAndNational: "שירות צבאי ולאומי",
   skills: "כישורים ומיומנויות",
   languages: "שפות",
   responsibilities: "תחומי אחריות",
@@ -70,6 +74,8 @@ const en: DocLabels = {
   jobs: "Experience",
   education: "Education",
   military: "Military service",
+  national: "National service",
+  militaryAndNational: "Military and national service",
   skills: "Skills",
   languages: "Languages",
   responsibilities: "Responsibilities",
