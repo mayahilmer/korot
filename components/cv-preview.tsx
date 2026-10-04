@@ -17,16 +17,34 @@ export function CvPreview({
     const node = host.current;
     if (!node) return;
     const shadow = node.shadowRoot ?? node.attachShadow({ mode: "open" });
-    shadow.innerHTML = `<style>${css}</style>${markup}`;
+    shadow.innerHTML = `<style>${css}
+      .fit { width: max-content; transform-origin: top left; }
+    </style><div class="fit">${markup}</div>`;
+    const paper = shadow.querySelector(".fit");
+    if (!(paper instanceof HTMLElement)) return;
+
+    const fit = () => {
+      const natural = paper.offsetWidth;
+      const scale = natural > 0 ? Math.min(1, node.clientWidth / natural) : 1;
+      paper.style.transform = `scale(${scale})`;
+      paper.style.marginBottom = `${paper.offsetHeight * (scale - 1)}px`;
+    };
+
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(node);
+    observer.observe(paper);
+    return () => observer.disconnect();
   }, [css, markup]);
 
   return (
-    <div className="overflow-hidden rounded-sm bg-white shadow-[0_18px_50px_rgba(48,36,22,0.14)]">
+    <div className="max-w-full overflow-hidden rounded-sm bg-white shadow-[0_18px_50px_rgba(48,36,22,0.14)]">
       <div
         ref={host}
         role="region"
         aria-label={label}
-        className="h-[72vh] min-h-[560px] overflow-auto bg-white lg:h-[calc(100vh-7.5rem)]"
+        dir="ltr"
+        className="h-[72vh] min-h-[420px] w-full max-w-full overflow-x-hidden overflow-y-auto bg-white lg:h-[calc(100vh-7.5rem)] lg:min-h-[560px]"
       />
     </div>
   );

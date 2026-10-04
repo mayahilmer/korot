@@ -13,7 +13,7 @@ const CSS = `
     color: #1c1915;
     padding: 16mm 16mm 18mm;
   }
-  .sheet.preview { min-height: 297mm; }
+  .sheet.preview { width: 210mm; min-height: 297mm; }
   .font-david { font-family: "CV David", David, "David Libre", "Times New Roman", serif; }
   .font-arial { font-family: "CV Arimo", Arial, Arimo, "Helvetica Neue", sans-serif; }
   @media print {
@@ -50,8 +50,8 @@ const CSS = `
   }
   .item { margin: 0 0 10px; break-inside: avoid; page-break-inside: avoid; }
   .head { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
-  .title { font-weight: 700; }
-  .dates { color: #3f3a34; white-space: nowrap; }
+  .title { font-weight: 700; min-width: 0; }
+  .dates { color: #3f3a34; white-space: nowrap; flex: none; }
   .meta { color: #3f3a34; margin-top: 1px; }
   .line { margin: 2px 0 0; }
   .k { font-weight: 700; }

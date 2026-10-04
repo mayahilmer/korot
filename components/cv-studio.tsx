@@ -197,7 +197,7 @@ export function CvStudio() {
         ))}
       </div>
       <div className="mt-4 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(460px,640px)]">
-        <div className={cn(tab !== "edit" && "hidden", "lg:block")}>
+        <div className={cn(tab !== "edit" && "hidden", "min-w-0 lg:block")}>
           <div className="mb-3 lg:hidden">{actions}</div>
           <CvForm
             cv={cv}
@@ -208,7 +208,7 @@ export function CvStudio() {
             }}
           />
         </div>
-        <aside className={cn(tab !== "preview" && "hidden", "lg:block")}>
+        <aside className={cn(tab !== "preview" && "hidden", "min-w-0 lg:block")}>
           <div className="lg:sticky lg:top-4">
             <p className="mb-2 text-sm text-muted-foreground">{copy.previewCaption}</p>
             <CvPreview css={preview.css} markup={preview.markup} label={copy.previewCaption} />
