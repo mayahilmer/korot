@@ -47,6 +47,13 @@ export function formatMonthYear(month: string, year: string, lang: Lang): string
   return name || cleanYear;
 }
 
+function joinRange(start: string, end: string): string {
+  if (!start || !end) return start || end;
+  const range = `${start} – ${end}`;
+  if (/[\u0590-\u05FF]/.test(range)) return range;
+  return `\u202A${range}\u202C`;
+}
+
 export function formatSpan(
   fromMonth: string,
   fromYear: string,
@@ -58,8 +65,7 @@ export function formatSpan(
 ): string {
   const start = formatMonthYear(fromMonth, fromYear, lang);
   const end = current ? present : formatMonthYear(toMonth, toYear, lang);
-  if (start && end) return `${start} – ${end}`;
-  return start || end;
+  return joinRange(start, end);
 }
 
 export function formatYears(
@@ -70,8 +76,7 @@ export function formatYears(
 ): string {
   const start = fromYear.trim();
   const end = current ? present : toYear.trim();
-  if (start && end) return `${start} – ${end}`;
-  return start || end;
+  return joinRange(start, end);
 }
 
 function pointKey(month: string, year: string, fallbackMonth: number): number | null {

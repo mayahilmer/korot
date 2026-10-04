@@ -81,7 +81,7 @@ function itemHtml(item: CvItem): string {
   const heading = item.heading
     ? `<div class="title">${htmlText(item.heading)}</div>`
     : "";
-  const dates = item.dates ? `<div class="dates">${htmlText(item.dates)}</div>` : "";
+  const dates = item.dates ? `<div class="dates">${dateHtml(item.dates)}</div>` : "";
   const meta = item.meta ? `<div class="meta">${htmlText(item.meta)}</div>` : "";
   const lines = item.lines
     .map((line) => {
@@ -90,6 +90,12 @@ function itemHtml(item: CvItem): string {
     })
     .join("");
   return `<div class="item"><div class="head">${heading}${dates}</div>${meta}${lines}</div>`;
+}
+
+function dateHtml(value: string): string {
+  const safe = htmlText(value);
+  if (/[\u0590-\u05FF]/.test(value)) return safe;
+  return `<bdi dir="ltr">${safe}</bdi>`;
 }
 
 function section(title: string, body: string): string {
@@ -138,7 +144,7 @@ export function renderCv(
       ? section(
           view.skills.title,
           `<ul class="chips">${view.skills.items
-            .map((skill) => `<li><span class="v">V</span>${escapeHtml(skill)}</li>`)
+            .map((skill) => `<li><span class="v">V</span> ${escapeHtml(skill)}</li>`)
             .join("")}</ul>`,
         )
       : "";

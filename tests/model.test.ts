@@ -26,7 +26,7 @@ test("escapes text and marks selected tools with V", () => {
   assert.doesNotMatch(html, /<script>/);
   assert.match(html, /תפקיד &amp; &quot;ציטוט&quot;/);
   assert.equal(html.includes("תיכון עירוני"), false);
-  assert.match(html, />V<\/span>Office/);
+  assert.match(html, />V<\/span> Office/);
   assert.match(html, /dir="rtl"/);
 });
 
